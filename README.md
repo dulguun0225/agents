@@ -35,6 +35,20 @@ git clone <repo-url> ~/repos/agents
 ln -s ~/repos/agents ~/.claude/agents
 ```
 
+## Workflows
+
+`workflows/` holds saved multi-agent workflows, junctioned to `~/.claude/workflows/` the same way (available in every project, invoked as `/<name>`):
+
+| Workflow | Stages (model/effort) | Use for |
+|---|---|---|
+| `/research-lite` | plan (sonnet/medium) → search (haiku/low, one per angle, ≤4 sources each) → verify load-bearing claims (sonnet/medium, ≤6) → report (opus/high) | Web research that needs citations but not the full `/deep-research` fan-out |
+
+```powershell
+New-Item -ItemType Junction -Path "$HOME\.claude\workflows" -Target D:\repos\dulguun0225\agents\workflows
+```
+
+The built-in `/deep-research` offers no per-stage model/effort control (only session-wide `effortLevel` and the advisory `workflowSizeGuideline`); `/research-lite` exists to route each stage to the cheapest model that holds quality.
+
 ## Frontmatter fields used
 
 - `model`: `haiku` | `sonnet` | `opus` | `fable` | full model ID | `inherit` (default)
