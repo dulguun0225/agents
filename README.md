@@ -20,10 +20,6 @@ Reusable subagent definitions with per-task model and reasoning-effort routing: 
 
 Escalation path: `scout` → `coder` → `deep-worker`; plan with `architect` first when the approach is unclear; run `reviewer` after any non-trivial change.
 
-### ASDLC skill mapping
-
-The set covers the ASDLC skill collection by work shape, not one agent per skill. Lifecycle documents (`asdlc-spec`, `asdlc-plan`, `asdlc-tasks`) run in the main session (they use AskUserQuestion); `spec-author` drafts sections on direction, `architect` does the read-only design exploration feeding the plan. `asdlc-implement` defaults to `deep-worker` — tests derive from signed requirements and the domain rule corpora (money, caching, async-handoff) are correctness-critical — with `coder` for purely mechanical tasks: `*-java` gate wiring, catalog entries, tasks.md bookkeeping. `tech-decision-research` fans out `researcher` for evidence gathering and spawns `refuter` for the panel and the independent refutation votes. `reviewer` audits diffs against whatever domain rule skills are installed. Rule-corpus skills themselves get no agent: they are context loaded by whichever agent edits or reviews.
-
 ## Install
 
 Agents are global when they live in `~/.claude/agents/`. Everything Claude-specific sits under `claude/` in this repo; link the subdirectories there instead of copying, so `git pull` updates them in place.
