@@ -2,7 +2,6 @@
 name: deep-worker
 description: Hard implementation and debugging - root-causing gnarly bugs, concurrency/race issues, performance problems, cross-cutting refactors, changes where a wrong move is expensive. Use only when coder is likely to fail or when correctness is critical; it is slow and expensive.
 tools: Read, Glob, Grep, Edit, Write, Bash
-model: opus
 effort: high
 color: red
 ---

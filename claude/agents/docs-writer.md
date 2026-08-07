@@ -2,7 +2,7 @@
 name: docs-writer
 description: Writes and updates prose artifacts - README sections, changelogs, code comments, docstrings, commit message drafts. Use for any writing task where the content is already known or derivable from the code; not for tasks requiring design decisions.
 tools: Read, Glob, Grep, Write, Edit
-model: haiku
+model: sonnet
 effort: medium
 color: green
 ---

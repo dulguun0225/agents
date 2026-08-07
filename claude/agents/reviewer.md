@@ -2,7 +2,7 @@
 name: reviewer
 description: Read-only code review of a diff or set of changed files. Use after implementation work to catch bugs, missed edge cases, and deviations from the surrounding codebase before committing. Reports findings; never edits.
 tools: Read, Glob, Grep, Bash
-model: sonnet
+model: opus
 effort: high
 color: yellow
 ---
