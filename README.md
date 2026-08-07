@@ -61,7 +61,19 @@ New-Item -ItemType Junction -Path "$HOME\.claude\workflows" -Target D:\repos\dul
 
 The built-in `/deep-research` offers no per-stage model/effort control (only session-wide `effortLevel` and the advisory `workflowSizeGuideline`); `/research-lite` exists to route each stage to the cheapest model that holds quality.
 
-Workflow-tool scripts (ultracode included) do **not** consult the routing table automatically — `agent()` calls default to the session model. Each call must pass `agentType: '<agent>'` (pulls the definition's model/effort/tools/prompt) or explicit `model`/`effort`. A "Workflow-script routing" rule in the global `~/.claude/CLAUDE.md` (tracked here as `claude/CLAUDE.md`, copied on install) instructs every session to route this way; the `Agent` tool needs no such rule — it auto-routes by `description` match.
+Workflow-tool scripts do **not** consult the routing table automatically — `agent()` calls default to the session model. Each call must pass `agentType: '<agent>'` (pulls the definition's model/effort/tools/prompt) or explicit `model`/`effort`. That is deliberate for ultracode: it buys maximum quality, so its workflows stay unrouted (the "Workflow-script routing" rule in `claude/CLAUDE.md`, copied to `~/.claude/CLAUDE.md` on install, says exactly that). Cost-routed orchestration is opt-in via the `/workflow-light` skill below. The `Agent` tool needs neither — it auto-routes by `description` match.
+
+## Skills
+
+`claude/skills/` holds skills, junctioned per skill directory into `~/.claude/skills/` (which also holds skills installed by other means, so the whole directory cannot be junctioned):
+
+| Skill | What it does |
+|---|---|
+| `/workflow-light` | Ultracode-style orchestration (same decomposition, fan-out, adversarial verification, synthesis) with per-stage cost routing: each `agent()` call gets the cheapest model+effort that holds quality, via `agentType` for stages matching a defined agent or explicit `model`/`effort` otherwise. Judgment stages always inherit the session model. Routing table in the skill mirrors the agent table above; the README is the source of truth on conflict. |
+
+```powershell
+New-Item -ItemType Junction -Path "$HOME\.claude\skills\workflow-light" -Target D:\repos\dulguun0225\agents\claude\skills\workflow-light
+```
 
 ## Frontmatter fields used
 
