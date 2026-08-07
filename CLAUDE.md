@@ -12,7 +12,7 @@ Priorities, in order:
 1. Quality of work done
 2. Token efficiency
 
-Concretely: judgment-heavy agents (`deep-worker`, `architect`, `spec-author`, `refuter`) **omit `model:`** so they inherit the session model — never pin them to a lower tier to save tokens. Mechanical/lookup work gets pinned cheap (`scout` = haiku/low, `coder`/`docs-writer` = sonnet/medium). When adding or retuning an agent, place it on this axis first; the README routing table is the source of truth and must be updated in the same change.
+Concretely: judgment-heavy agents (`deep-worker`, `architect`, `spec-author`, `refuter`, `reviewer`) **omit `model:`** so they inherit the session model — never pin them to a lower tier to save tokens. Mechanical/lookup work gets pinned cheap (`scout` = haiku/low, `coder`/`docs-writer` = sonnet/medium). When adding or retuning an agent, place it on this axis first; the README routing table is the source of truth and must be updated in the same change.
 
 ## Architecture
 

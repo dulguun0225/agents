@@ -9,14 +9,14 @@ Reusable subagent definitions with per-task model and reasoning-effort routing: 
 | `scout` | haiku | low | Locating files, symbols, usages ("where is X") |
 | `docs-writer` | sonnet | medium | README, changelogs, comments, docstrings |
 | `coder` | sonnet | medium | Well-scoped features, known-cause fixes, mechanical refactors, tests |
-| `reviewer` | opus | high | Read-only diff review before committing |
+| `reviewer` | inherit | high | Read-only diff review before committing |
 | `deep-worker` | inherit | high | Gnarly bugs, concurrency, performance, cross-cutting refactors |
 | `architect` | inherit | high | Read-only design/planning when the approach is not obvious |
 | `spec-author` | inherit | high | Drafting spec.md / plan.md / tasks.md under `specs/**`, rule authoring |
 | `researcher` | sonnet | high | Web evidence gathering: dated claims, registry/version checks, candidate surveys |
 | `refuter` | inherit | high | Adversarial panelist: steelman, then refutation vote on a proposed decision |
 
-`deep-worker`, `architect`, `spec-author`, and `refuter` omit `model:` so they inherit the session model — pinning them would cap quality below the session tier (e.g. Fable) exactly where being wrong is expensive.
+`deep-worker`, `architect`, `spec-author`, `refuter`, and `reviewer` omit `model:` so they inherit the session model — pinning them would cap quality below the session tier (e.g. Fable) exactly where being wrong is expensive. Review is the last gate before commit; a pinned reviewer would judge the session model's work with a weaker model.
 
 Escalation path: `scout` → `coder` → `deep-worker`; plan with `architect` first when the approach is unclear; run `reviewer` after any non-trivial change.
 
@@ -58,7 +58,7 @@ The built-in `/deep-research` offers no per-stage model/effort control (only ses
 
 - `model`: `haiku` | `sonnet` | `opus` | `fable` | full model ID | `inherit` (default)
 - `effort`: `low` | `medium` | `high` | `xhigh` | `max`
-- `tools`: comma-separated allowlist; read-only agents (`scout`, `reviewer`, `architect`) get no `Edit`/`Write`
+- `tools`: comma-separated allowlist; read-only agents (`scout`, `reviewer`, `architect`, `refuter`) get no `Edit`/`Write`; `scout` also gets no `Bash` — Glob/Grep cover search, and no Bash means no shell escape from read-only
 - `color`: task-list display color
 
 Full field reference: https://code.claude.com/docs/en/sub-agents.md

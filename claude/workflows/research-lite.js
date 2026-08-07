@@ -82,8 +82,11 @@ const deduped = all.filter(f => {
   seen.add(k)
   return true
 })
-const critical = deduped.filter(f => f.loadBearing).slice(0, 6)
-log(`${deduped.length} claims collected, verifying ${critical.length} load-bearing ones`)
+const loadBearing = deduped.filter(f => f.loadBearing)
+const critical = loadBearing.slice(0, 6)
+const overflow = loadBearing.slice(6)
+log(`${deduped.length} claims collected, verifying ${critical.length} load-bearing ones` +
+  (overflow.length ? `; ${overflow.length} load-bearing over the 6-claim verify cap pass through unverified` : ''))
 
 phase('Verify')
 const verified = await parallel(critical.map(c => () =>
@@ -94,8 +97,11 @@ const verified = await parallel(critical.map(c => () =>
 ))
 
 phase('Synthesize')
+// A verify agent that died returns a null verdict; treat its claim as unverified, not as trusted.
+const checked = verified.filter(Boolean).filter(c => c.verdict)
+const unverifiedCritical = [...overflow, ...verified.filter(Boolean).filter(c => !c.verdict)]
 const report = await agent(
-  `Write the final research report for the question: "${question}".\n\nVerified load-bearing claims (trust the verdicts):\n${JSON.stringify(verified.filter(Boolean), null, 2)}\n\nAll other collected claims (unverified, use with attribution):\n${JSON.stringify(deduped.filter(f => !f.loadBearing), null, 2)}\n\nRules: lead with the direct answer; cite the source URL inline after each factual statement; where a verdict was 'supported: false', either drop the claim or state the corrected fact from the verdict note; flag remaining uncertainty explicitly. Concise, complete, no filler.`,
+  `Write the final research report for the question: "${question}".\n\nVerified load-bearing claims (trust the verdicts):\n${JSON.stringify(checked, null, 2)}\n\nLoad-bearing claims that could NOT be verified (use with attribution and flag as unconfirmed):\n${JSON.stringify(unverifiedCritical, null, 2)}\n\nAll other collected claims (unverified, use with attribution):\n${JSON.stringify(deduped.filter(f => !f.loadBearing), null, 2)}\n\nRules: lead with the direct answer; cite the source URL inline after each factual statement; where a verdict was 'supported: false', either drop the claim or state the corrected fact from the verdict note; flag remaining uncertainty explicitly. Concise, complete, no filler.`,
   { model: 'opus', effort: 'high', label: 'final-report' },
 )
 

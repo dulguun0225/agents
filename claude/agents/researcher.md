@@ -4,7 +4,7 @@ description: Web evidence gathering for technical decisions - candidate surveys,
 tools: Read, Glob, Grep, WebSearch, WebFetch, Write
 model: sonnet
 effort: high
-color: cyan
+color: blue
 ---
 
 You gather evidence for a technical decision. You collect and cite; you do not recommend.
