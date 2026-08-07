@@ -7,10 +7,10 @@ Reusable subagent definitions with per-task model and reasoning-effort routing: 
 | Agent | Model | Effort | Use for |
 |---|---|---|---|
 | `scout` | haiku | low | Locating files, symbols, usages ("where is X") |
-| `prober` | haiku | low | System-state checks: link/junction targets, hardlink identity, processes, env, tool versions |
+| `prober` | haiku | low | System-state checks: link/junction targets, hardlink identity, processes, env, tool versions; running a read-only command the caller wrote out, for its output |
 | `docs-writer` | sonnet | medium | README, changelogs, comments, docstrings |
 | `coder` | sonnet | medium | Well-scoped features, known-cause fixes, mechanical refactors, tests |
-| `reviewer` | inherit | high | Read-only diff review before committing; config/docs consistency audits |
+| `reviewer` | inherit | high | Read-only diff review before committing; config/docs consistency audits; conformance audit of a corpus against a stated rule |
 | `deep-worker` | inherit | high | Gnarly bugs, concurrency, performance, cross-cutting refactors |
 | `architect` | inherit | high | Read-only design/planning when the approach is not obvious |
 | `spec-author` | inherit | high | Drafting spec.md / plan.md / tasks.md under `specs/**`, rule authoring |
@@ -63,7 +63,7 @@ Workflow-tool scripts do **not** consult the routing table automatically — `ag
 
 | Skill | What it does |
 |---|---|
-| `/workflow-light` | Ultracode-style orchestration (same decomposition, fan-out, adversarial verification, synthesis) with per-stage cost routing: each `agent()` call gets the cheapest model+effort that holds quality, via `agentType` for stages matching a defined agent or explicit `model`/`effort` otherwise. Judgment stages always inherit the session model. Routing table in the skill mirrors the agent table above; the README is the source of truth on conflict. |
+| `/workflow-light` | Ultracode-style orchestration (same decomposition, fan-out, adversarial verification, synthesis) with per-stage cost routing: each `agent()` call gets the cheapest model+effort that holds quality, via `agentType` for stages matching a defined agent or explicit `model`/`effort` otherwise. Judgment stages always inherit the session model, and a conformance audit is a judgment stage — locating is cheap, deciding whether a corpus satisfies a rule is not. A cheap stage is handed the exact command, returns the complete list of what it examined, and carries a seeded known answer. In a read-only session every stage pins a read-only `agentType`. Routing table in the skill mirrors the agent table above; the README is the source of truth on conflict. |
 
 ```powershell
 New-Item -ItemType Junction -Path "$HOME\.claude\skills\workflow-light" -Target D:\repos\dulguun0225\agents\claude\skills\workflow-light

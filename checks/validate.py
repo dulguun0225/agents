@@ -6,10 +6,15 @@ Checks:
 2. Tool allowlists: read-only agents carry no Edit/Write/NotebookEdit; scout no Bash.
 3. README routing table matches agent frontmatter (model, effort), both directions.
 4. workflow-light SKILL.md routing table: every referenced agentType exists and its
-   route (model / effort) matches that agent's frontmatter.
-5. Workflow scripts: `export const meta` first statement, meta has name+description,
+   route (model / effort) matches that agent's frontmatter, and every agent in the
+   README table is routed by at least one row or declared not routed.
+5. The read-only agent set is stated identically in three places: READ_ONLY below, the
+   README's "Frontmatter fields used" paragraph, and the skill's "Read-only sessions".
+6. Workflow scripts: `export const meta` first statement, meta has name+description,
    syntax-checks under node as an ES module when node is available.
-6. Skill frontmatter: name matches directory, description present.
+7. Skill frontmatter: name matches directory, description present.
+8. evals/: every eval file appears in the README suite table and every table row names a
+   file that exists; routing.md's rubric denominators match its task-row count.
 
 Exit 0 = clean, 1 = failures (each printed as FAIL: ...). Warnings do not fail.
 """
@@ -25,6 +30,7 @@ ROOT = Path(__file__).resolve().parent.parent
 AGENTS = ROOT / "claude" / "agents"
 WORKFLOWS = ROOT / "claude" / "workflows"
 SKILLS = ROOT / "claude" / "skills"
+EVALS = ROOT / "evals"
 README = ROOT / "README.md"
 
 MODELS = {"haiku", "sonnet", "opus", "fable"}
@@ -141,12 +147,15 @@ def check_skills(agents: dict[str, dict[str, str]]) -> None:
             fail(f"skills/{skill_dir.name}: missing 'description'")
         if skill_dir.name == "workflow-light":
             check_workflow_light_table(skill_md, agents)
+            check_read_only_sets(skill_md, agents)
 
 
 def check_workflow_light_table(skill_md: Path, agents: dict[str, dict[str, str]]) -> None:
     """Routing rows: | stage kind | model / effort | `agentType` or — |"""
+    text = skill_md.read_text(encoding="utf-8")
     seen_any = False
-    for line in skill_md.read_text(encoding="utf-8").splitlines():
+    routed: set[str] = set()
+    for line in text.splitlines():
         m = re.match(r"^\|[^|]+\|\s*(\w+)\s*/\s*(\w+)\s*\|\s*(?:`([\w-]+)`|—)\s*\|", line)
         if not m:
             continue
@@ -154,6 +163,7 @@ def check_workflow_light_table(skill_md: Path, agents: dict[str, dict[str, str]]
         model, effort, agent_type = m.group(1), m.group(2), m.group(3)
         if agent_type is None:
             continue
+        routed.add(agent_type)
         if agent_type not in agents:
             fail(f"workflow-light: table references agentType '{agent_type}' with no agent file")
             continue
@@ -165,6 +175,102 @@ def check_workflow_light_table(skill_md: Path, agents: dict[str, dict[str, str]]
             fail(f"workflow-light: '{agent_type}' routed as effort '{effort}' but agent effort is '{fm_effort}'")
     if not seen_any:
         fail("workflow-light: routing table rows not found (format changed? update this parser)")
+        return
+
+    # Reverse direction: an agent nobody routes is an agent workflow-light silently
+    # never uses. Declaring it is fine; leaving it unmentioned is drift.
+    declared = re.search(r"Not routed by workflow-light:\s*(.*)", text)
+    excluded = set(re.findall(r"`([\w-]+)`", declared.group(1))) if declared else set()
+    for name in sorted(agents):
+        if name not in routed and name not in excluded:
+            fail(f"workflow-light: agent '{name}' appears in no routing row and is not declared not routed")
+    for name in sorted(excluded & routed):
+        fail(f"workflow-light: '{name}' is declared not routed but appears in a routing row")
+
+
+def check_read_only_sets(skill_md: Path, agents: dict[str, dict[str, str]]) -> None:
+    """READ_ONLY, the README paragraph and the skill's section must name one set."""
+    m = re.search(r"read-only agents \(([^)]*)\)", README.read_text(encoding="utf-8"))
+    if m is None:
+        fail("README.md: 'read-only agents (...)' list not found in 'Frontmatter fields used'")
+    else:
+        found = set(re.findall(r"`([\w-]+)`", m.group(1)))
+        if found != READ_ONLY:
+            fail(f"README.md: read-only set {sorted(found)} != validate.py READ_ONLY {sorted(READ_ONLY)}")
+
+    text = skill_md.read_text(encoding="utf-8")
+    section = re.search(r"^## Read-only sessions$(.*?)(?=^## |\Z)", text, re.M | re.S)
+    if section is None:
+        fail("workflow-light: '## Read-only sessions' section not found")
+        return
+    sentence = re.search(r"pins a read-only[^\n]*", section.group(1))
+    if sentence is None:
+        fail("workflow-light: '## Read-only sessions' names no agent list")
+        return
+    found = set(re.findall(r"`([\w-]+)`", sentence.group(0))) & set(agents)
+    if found != READ_ONLY:
+        fail(f"workflow-light: read-only set {sorted(found)} != validate.py READ_ONLY {sorted(READ_ONLY)}")
+
+
+def check_evals() -> None:
+    """Every eval is listed, every listing exists, and routing.md counts itself right."""
+    readme = EVALS / "README.md"
+    if not readme.exists():
+        fail("evals/README.md: missing")
+        return
+    section = re.search(r"^## Suite$(.*?)(?=^## |\Z)", readme.read_text(encoding="utf-8"), re.M | re.S)
+    if section is None:
+        fail("evals/README.md: '## Suite' section not found (format changed? update this parser)")
+        return
+
+    listed: set[str] = set()
+    for line in section.group(1).splitlines():
+        if not line.startswith("|"):
+            continue
+        for ref in re.findall(r"`([^`]+)`", line.split("|")[1]):
+            if not ref.endswith(".md"):
+                continue
+            listed.add(ref)
+            if not (EVALS / ref).exists():
+                fail(f"evals/README.md: suite row names '{ref}', which does not exist")
+    if not listed:
+        fail("evals/README.md: suite table lists no eval files (format changed? update this parser)")
+        return
+
+    for path in sorted(EVALS.glob("*.md")):
+        if path.name in {"README.md", "RESULTS.md"} or path.name in listed:
+            continue
+        fail(f"evals/{path.name}: not listed in the evals/README.md suite table")
+    for directory in sorted(p for p in EVALS.iterdir() if p.is_dir()):
+        task = f"{directory.name}/task.md"
+        if (EVALS / task).exists() and task not in listed:
+            fail(f"evals/{task}: not listed in the evals/README.md suite table")
+
+    check_routing_eval()
+
+
+def check_routing_eval() -> None:
+    path = EVALS / "routing.md"
+    if not path.exists():
+        fail("evals/routing.md: missing")
+        return
+    text = path.read_text(encoding="utf-8")
+    numbers = [int(n) for n in re.findall(r"^\|\s*(\d+)\s*\|", text, re.M)]
+    if not numbers:
+        fail("evals/routing.md: no numbered task rows found (format changed? update this parser)")
+        return
+    if numbers != list(range(1, len(numbers) + 1)):
+        fail(f"evals/routing.md: task numbers are not 1..{len(numbers)} in order: {numbers}")
+    rubric = re.search(r"^## Rubric$(.*)", text, re.M | re.S)
+    if rubric is None:
+        fail("evals/routing.md: '## Rubric' section not found")
+        return
+    denominators = {int(d) for d in re.findall(r"/(\d+)", rubric.group(1))}
+    if denominators != {len(numbers)}:
+        fail(
+            f"evals/routing.md: rubric denominators {sorted(denominators)} "
+            f"do not match the {len(numbers)} task rows"
+        )
 
 
 def node_invocation() -> list[str] | None:
@@ -214,6 +320,7 @@ def main() -> int:
     check_readme(agents)
     check_skills(agents)
     check_workflows()
+    check_evals()
     for w in warnings:
         print(f"WARN: {w}")
     if failures:

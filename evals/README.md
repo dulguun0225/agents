@@ -20,11 +20,12 @@ When to run:
 | `refuter.md` | refuter | Refutes a plausible-but-wrong leaning instead of endorsing it |
 | `scout.md` | scout | Locates definitions/usages, terse `path:line` output |
 | `prober.md` | prober | Reports link/system state exactly, including broken state, without prescribing fixes |
-| `coder.md` (`coder/task.md`) | coder | Minimal known-cause fix, proves the test passes |
+| `coder/task.md` | coder | Minimal known-cause fix, proves the test passes |
 | `researcher.md` | researcher | Dated claims with official citations, inference flagged |
+| `workflow-light.md` | (live, `/workflow-light`) | Routes a conformance audit to `reviewer`, returns every planted violation, no false positives, read-only pinning holds |
 
 Not covered (judgment quality is hard to rubric; rely on real use + reviewer gate): `architect`, `deep-worker`, `docs-writer`, `spec-author`.
 
-Live integration (run occasionally, they cost real tokens): `/research-lite` on a question with an official schedule as ground truth; `/workflow-light` on a small audit task — check the authored script routes stages per the SKILL.md table and judgment stages stay unrouted.
+Live integration (run occasionally, they cost real tokens): `/research-lite` on a question with an official schedule as ground truth; `/workflow-light` per `workflow-light.md`, which has its own fixture and answer key.
 
 Results log: `RESULTS.md`.

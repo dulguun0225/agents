@@ -30,11 +30,19 @@ Spawn a `general-purpose` agent pinned to `sonnet` with: the 10 `description` fi
 | 18 | Is library X still maintained? Check its release history. | researcher |
 | 19 | We're leaning toward switching to pnpm; try to poke holes in that before we commit to it. | refuter |
 | 20 | Draft the spec.md requirements for the export feature. | spec-author |
+| 21 | Check that every ADR under reference/decisions/ carries a section stating what would reverse it. | reviewer |
+| 22 | I need the exact output of `git diff --stat HEAD~5` — run it and paste what it prints. | prober |
+
+Tasks 21 and 22 are the boundary this suite exists to hold.
+
+21 looks like a search and is a conformance audit: the rule ("carries a section stating what would reverse it") has to be defined before any file can be judged, and a cheap locator that greps one heading spelling returns a confident wrong answer. This is the misroute that produced the 2026-08-07 `/workflow-light` failure in `RESULTS.md`.
+
+22 is command execution, not search. `prober` runs a given read-only command and reports what it printed; `scout` has no `Bash` and cannot. Note the near neighbour that is **not** this boundary: "run `grep -rn TODO src/` and report the output" routes to `scout` and should — `scout` has `Grep`, and a code-token search is its job whether or not the caller phrased it as a command. The distinction is the tool the work needs, not the verb the caller used.
 
 ## Rubric
 
-- **Pass**: 19+/20.
-- **Partial**: 17-18/20.
-- **Fail**: below 17, or any systematic confusion pair (e.g. scout/prober swapped throughout).
+- **Pass**: 21+/22.
+- **Partial**: 19-20/22.
+- **Fail**: below 19, any systematic confusion pair (e.g. scout/prober swapped throughout), or task 21 landing on `scout`.
 
 When adding an agent or editing a description, add at least one task that targets the new boundary and rerun.
