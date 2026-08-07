@@ -1,0 +1,4 @@
+# Workflow scripts are read verbatim by the Workflow tool; CRLF in the working
+# tree makes the permission layer reject them ("control characters that would be
+# hidden in the approval dialog"). Force LF on checkout.
+claude/workflows/*.js text eol=lf

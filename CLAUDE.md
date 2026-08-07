@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Global Claude Code subagent definitions (`claude/agents/*.md`), saved workflows (`claude/workflows/*.js`), and skills (`claude/skills/<name>/SKILL.md`). The `claude/` subdirectories are junctioned/symlinked into `~/.claude/agents`, `~/.claude/workflows`, and `~/.claude/skills/<name>` (per skill directory), so **edits here are live global config** — sessions on this machine pick up edits to existing files on the next agent spawn; a *newly added* agent file is only visible to sessions started after it exists (the agent list loads at session start). There is no build, test, or lint step; the only validation is correct frontmatter (agents and skills) and workflow-script syntax.
+Global Claude Code subagent definitions (`claude/agents/*.md`), saved workflows (`claude/workflows/*.js`), and skills (`claude/skills/<name>/SKILL.md`). The `claude/` subdirectories are junctioned/symlinked into `~/.claude/agents`, `~/.claude/workflows`, and `~/.claude/skills/<name>` (per skill directory), so **edits here are live global config** — sessions on this machine pick up edits to existing files on the next agent spawn; a *newly added* agent file is only visible to sessions started after it exists (the agent list loads at session start). Validation is `python checks/validate.py` (frontmatter fields, tool allowlists, README/SKILL routing-table consistency, workflow-script syntax) plus the behavioral eval suite in `evals/` (golden tasks per agent with rubrics; see `evals/README.md` for when to run which).
 
 ## Routing principle
 
@@ -21,7 +21,8 @@ Concretely: judgment-heavy agents (`deep-worker`, `architect`, `spec-author`, `r
 - `claude/workflows/<name>.js` — Workflow-tool scripts (plain JS, `export const meta` first). Per-stage `model`/`effort` on each `agent()` call is the point of these workflows: route each stage to the cheapest model that holds quality (see `research-lite.js` — haiku searchers, sonnet verify, opus synthesis).
 - `claude/skills/<name>/SKILL.md` — skill definitions, junctioned per skill directory into `~/.claude/skills/<name>`. `workflow-light`'s routing table mirrors the README table; the README wins on conflict and both must change together.
 - Escalation path between agents: `scout` → `coder` → `deep-worker`; `architect` before implementation when the approach is unclear; `reviewer` after non-trivial changes.
+- `checks/validate.py` — static consistency validator (no dependencies, exit 1 on drift). `evals/` — behavioral golden tasks with answer keys and rubrics; fixtures under `evals/*/fixture/` are eval props, not real code. `.gitattributes` forces LF on `claude/workflows/*.js`: the Workflow tool rejects CRLF scripts ("control characters"), and a session caches named-workflow scripts at start, so a line-ending fix needs a new session to take effect for by-name invocation.
 
 ## Editing workflow
 
-Change a file, update the README routing table if routing changed, commit, push. No reinstall step.
+Change a file, update the README routing table if routing changed, run `python checks/validate.py`, commit, push. No reinstall step. After editing an agent's `description` or rules, also run that agent's eval and `evals/routing.md` (see `evals/README.md`).

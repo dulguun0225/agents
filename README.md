@@ -78,6 +78,13 @@ New-Item -ItemType Junction -Path "$HOME\.claude\skills\workflow-light" -Target 
 
 Full field reference: https://code.claude.com/docs/en/sub-agents.md
 
+## Checks and evals
+
+- `python checks/validate.py` — static consistency: frontmatter fields and values, read-only tool allowlists, README routing table vs agent files (both directions), workflow-light SKILL.md routes vs agent files, workflow-script syntax. Exit 1 on any drift; run before committing.
+- `evals/` — behavioral golden tasks per agent (seeded-bug diff for `reviewer`, sycophancy test for `refuter`, description-routing test, and more), each with an answer key and pass/partial/fail rubric. `evals/README.md` says when to run which; results log in `evals/RESULTS.md`.
+
 ## Editing
 
-Change a file, commit, push. Sessions pick up edits to existing files on next agent spawn; a newly added agent needs a new session (the agent list loads at session start). No reinstall step.
+Change a file, commit, push. Sessions pick up edits to existing files on next agent spawn; a newly added agent needs a new session (the agent list loads at session start). No reinstall step. Run `checks/validate.py` before committing; run the affected evals after changing an agent's `description` or rules.
+
+Note on workflows: `claude/workflows/*.js` must stay LF (enforced via `.gitattributes`) — the Workflow tool rejects CRLF scripts, and by-name invocation caches scripts at session start, so line-ending fixes need a new session.
