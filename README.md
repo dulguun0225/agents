@@ -29,9 +29,16 @@ Windows (junction, no admin needed):
 ```powershell
 git clone <repo-url> D:\repos\dulguun0225\agents
 New-Item -ItemType Junction -Path "$HOME\.claude\agents" -Target D:\repos\dulguun0225\agents\claude\agents
+Copy-Item D:\repos\dulguun0225\agents\claude\CLAUDE.md "$HOME\.claude\CLAUDE.md"
 ```
 
 If `~/.claude/agents` already exists, move its contents into the clone first, then delete the directory and create the junction.
+
+`claude/CLAUDE.md` is the global user CLAUDE.md — it carries the Workflow-script routing rule that makes ultracode/Workflow scripts use this repo's agent definitions (`agentType`) and per-stage `model`/`effort` instead of defaulting every agent to the session model. It must be a copy, not a junction: junctions are directory-only, and a file symlink needs admin or Developer Mode. After editing it in the repo, re-run the `Copy-Item`. With Developer Mode on, a symlink removes that step:
+
+```powershell
+New-Item -ItemType SymbolicLink -Path "$HOME\.claude\CLAUDE.md" -Target D:\repos\dulguun0225\agents\claude\CLAUDE.md
+```
 
 macOS/Linux:
 
@@ -54,7 +61,7 @@ New-Item -ItemType Junction -Path "$HOME\.claude\workflows" -Target D:\repos\dul
 
 The built-in `/deep-research` offers no per-stage model/effort control (only session-wide `effortLevel` and the advisory `workflowSizeGuideline`); `/research-lite` exists to route each stage to the cheapest model that holds quality.
 
-Workflow-tool scripts (ultracode included) do **not** consult the routing table automatically — `agent()` calls default to the session model. Each call must pass `agentType: '<agent>'` (pulls the definition's model/effort/tools/prompt) or explicit `model`/`effort`. A "Workflow-script routing" rule in the global `~/.claude/CLAUDE.md` instructs every session to route this way; the `Agent` tool needs no such rule — it auto-routes by `description` match.
+Workflow-tool scripts (ultracode included) do **not** consult the routing table automatically — `agent()` calls default to the session model. Each call must pass `agentType: '<agent>'` (pulls the definition's model/effort/tools/prompt) or explicit `model`/`effort`. A "Workflow-script routing" rule in the global `~/.claude/CLAUDE.md` (tracked here as `claude/CLAUDE.md`, copied on install) instructs every session to route this way; the `Agent` tool needs no such rule — it auto-routes by `description` match.
 
 ## Frontmatter fields used
 
