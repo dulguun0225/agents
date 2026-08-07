@@ -16,6 +16,7 @@ Pick per stage, by the kind of work the agent does:
 | Stage kind | Route | `agentType` |
 |---|---|---|
 | Locate code, files, symbols, usages | haiku / low | `scout` |
+| Local system state checks: links, junctions, processes, env | haiku / low | `prober` |
 | Web search, claim extraction, per-source reading | haiku / low | — |
 | Dedup, format conversion, counting, list merging | haiku / low | — |
 | Well-scoped edit with a decided approach | sonnet / medium | `coder` |
@@ -35,6 +36,12 @@ Rules:
 - Judgment stages (the inherit rows) omit `model` so they run on the session model. Never pin them lower; the routed agents (`architect`, `deep-worker`, `reviewer`, `refuter`, `spec-author`) already inherit.
 - A stage that fits two rows gets the higher one. Unsure which bucket: the higher one. Quality first, token efficiency second.
 - Findings from cheap finders still get session-model verification when they gate a conclusion (commit verdict, decision vote, final report claim).
+- Absence gates too: a cheap stage's empty or clean result that gates a destructive or irreversible action (delete, overwrite, force-push, deploy) is itself a conclusion — verify it with a session-model agent before acting.
 - In the final report, state the routing used: agents per stage and their models, so the user can judge the trade.
+
+## Authoring
+
+- A stage whose job is to report facts gets a data schema shaped like those facts. A findings/problems schema makes a cheap model return empty when everything is healthy — the facts silently vanish.
+- Dedup in plain code by key first; spawn a dedup agent only when more than one finder returned findings and code cannot merge them.
 
 The routing table above mirrors the agent table in the dulguun0225/agents README; when they disagree, the README is the source of truth.

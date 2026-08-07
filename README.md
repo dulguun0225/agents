@@ -7,9 +7,10 @@ Reusable subagent definitions with per-task model and reasoning-effort routing: 
 | Agent | Model | Effort | Use for |
 |---|---|---|---|
 | `scout` | haiku | low | Locating files, symbols, usages ("where is X") |
+| `prober` | haiku | low | System-state checks: link/junction targets, hardlink identity, processes, env, tool versions |
 | `docs-writer` | sonnet | medium | README, changelogs, comments, docstrings |
 | `coder` | sonnet | medium | Well-scoped features, known-cause fixes, mechanical refactors, tests |
-| `reviewer` | inherit | high | Read-only diff review before committing |
+| `reviewer` | inherit | high | Read-only diff review before committing; config/docs consistency audits |
 | `deep-worker` | inherit | high | Gnarly bugs, concurrency, performance, cross-cutting refactors |
 | `architect` | inherit | high | Read-only design/planning when the approach is not obvious |
 | `spec-author` | inherit | high | Drafting spec.md / plan.md / tasks.md under `specs/**`, rule authoring |
@@ -72,11 +73,11 @@ New-Item -ItemType Junction -Path "$HOME\.claude\skills\workflow-light" -Target 
 
 - `model`: `haiku` | `sonnet` | `opus` | `fable` | full model ID | `inherit` (default)
 - `effort`: `low` | `medium` | `high` | `xhigh` | `max`
-- `tools`: comma-separated allowlist; read-only agents (`scout`, `reviewer`, `architect`, `refuter`) get no `Edit`/`Write`; `scout` also gets no `Bash` — Glob/Grep cover search, and no Bash means no shell escape from read-only
+- `tools`: comma-separated allowlist; read-only agents (`scout`, `prober`, `reviewer`, `architect`, `refuter`) get no `Edit`/`Write`; `scout` also gets no `Bash` — Glob/Grep cover search, and no Bash means no shell escape from read-only. `prober` needs `Bash` for state inspection (link targets, processes, versions); its read-only guarantee is by prompt rule (inspection commands only), not by tool allowlist
 - `color`: task-list display color
 
 Full field reference: https://code.claude.com/docs/en/sub-agents.md
 
 ## Editing
 
-Change a file, commit, push. Sessions pick up changes on next agent spawn; no reinstall step.
+Change a file, commit, push. Sessions pick up edits to existing files on next agent spawn; a newly added agent needs a new session (the agent list loads at session start). No reinstall step.
