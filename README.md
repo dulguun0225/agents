@@ -54,6 +54,8 @@ New-Item -ItemType Junction -Path "$HOME\.claude\workflows" -Target D:\repos\dul
 
 The built-in `/deep-research` offers no per-stage model/effort control (only session-wide `effortLevel` and the advisory `workflowSizeGuideline`); `/research-lite` exists to route each stage to the cheapest model that holds quality.
 
+Workflow-tool scripts (ultracode included) do **not** consult the routing table automatically — `agent()` calls default to the session model. Each call must pass `agentType: '<agent>'` (pulls the definition's model/effort/tools/prompt) or explicit `model`/`effort`. A "Workflow-script routing" rule in the global `~/.claude/CLAUDE.md` instructs every session to route this way; the `Agent` tool needs no such rule — it auto-routes by `description` match.
+
 ## Frontmatter fields used
 
 - `model`: `haiku` | `sonnet` | `opus` | `fable` | full model ID | `inherit` (default)
