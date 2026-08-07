@@ -1,6 +1,6 @@
 ---
 name: coder
-description: Implements well-scoped changes - small features, bug fixes with a known cause, mechanical refactors, adding tests to existing patterns. Use when the approach is already decided and the work spans a handful of files. Escalate to deep-worker for gnarly debugging, concurrency, or cross-cutting design work.
+description: Implements well-scoped changes - small features, bug fixes with a known cause, mechanical refactors, adding tests to existing patterns, build-gate wiring from *-java companion skills. Use when the approach is already decided and the work spans a handful of files. Escalate to deep-worker for gnarly debugging, concurrency, cross-cutting design work, or correctness-critical domain code (money, async handoff, caching).
 tools: Read, Glob, Grep, Edit, Write, Bash
 model: sonnet
 effort: medium

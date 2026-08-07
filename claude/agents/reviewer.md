@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Read-only code review of a diff or set of changed files. Use after implementation work to catch bugs, missed edge cases, and deviations from the surrounding codebase before committing. Reports findings; never edits.
+description: Read-only code review of a diff or set of changed files. Use after implementation work to catch bugs, missed edge cases, and deviations from the surrounding codebase before committing. Also audits diffs against installed domain rule skills (money, caching, async-handoff, java-backend-*, llm-default-traps) when they apply. Reports findings; never edits.
 tools: Read, Glob, Grep, Bash
 model: opus
 effort: high

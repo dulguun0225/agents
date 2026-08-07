@@ -12,10 +12,17 @@ Reusable subagent definitions with per-task model and reasoning-effort routing: 
 | `reviewer` | opus | high | Read-only diff review before committing |
 | `deep-worker` | inherit | high | Gnarly bugs, concurrency, performance, cross-cutting refactors |
 | `architect` | inherit | high | Read-only design/planning when the approach is not obvious |
+| `spec-author` | inherit | high | Drafting spec.md / plan.md / tasks.md under `specs/**`, rule authoring |
+| `researcher` | sonnet | high | Web evidence gathering: dated claims, registry/version checks, candidate surveys |
+| `refuter` | inherit | high | Adversarial panelist: steelman, then refutation vote on a proposed decision |
 
-`deep-worker` and `architect` omit `model:` so they inherit the session model — pinning them would cap quality below the session tier (e.g. Fable) exactly where being wrong is expensive.
+`deep-worker`, `architect`, `spec-author`, and `refuter` omit `model:` so they inherit the session model — pinning them would cap quality below the session tier (e.g. Fable) exactly where being wrong is expensive.
 
 Escalation path: `scout` → `coder` → `deep-worker`; plan with `architect` first when the approach is unclear; run `reviewer` after any non-trivial change.
+
+### ASDLC skill mapping
+
+The set covers the ASDLC skill collection by work shape, not one agent per skill. Lifecycle documents (`asdlc-spec`, `asdlc-plan`, `asdlc-tasks`) run in the main session (they use AskUserQuestion); `spec-author` drafts sections on direction, `architect` does the read-only design exploration feeding the plan. `asdlc-implement` defaults to `deep-worker` — tests derive from signed requirements and the domain rule corpora (money, caching, async-handoff) are correctness-critical — with `coder` for purely mechanical tasks: `*-java` gate wiring, catalog entries, tasks.md bookkeeping. `tech-decision-research` fans out `researcher` for evidence gathering and spawns `refuter` for the panel and the independent refutation votes. `reviewer` audits diffs against whatever domain rule skills are installed. Rule-corpus skills themselves get no agent: they are context loaded by whichever agent edits or reviews.
 
 ## Install
 
